@@ -1,0 +1,5 @@
+apiVersion: v2
+name: infra-devops-assessment
+version: 0.1.0
+description: A Helm chart for deploying two web services, a reverse proxy, and locust for load testing
+appVersion: "1.0"

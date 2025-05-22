@@ -1,0 +1,81 @@
+/* Reset and Base */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f9;
+    color: #333;
+  }
+  
+  /* Header */
+  header {
+    background: #0d4598;
+    color: white;
+    padding: 2rem 1rem;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  header h2 {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #c5e4e7;
+    margin-bottom: 1rem;
+  }
+  
+  /* Image Styling */
+  header img {
+    max-width: 90%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  
+  /* Main Content */
+  main {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  }
+  
+  section {
+    margin-bottom: 2rem;
+  }
+  
+  section h3 {
+    color: #004777;
+    margin-bottom: 0.75rem;
+  }
+  
+  ul {
+    list-style: square;
+    padding-left: 1.5rem;
+    line-height: 1.6;
+  }
+  
+  /* Footer */
+  footer {
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 1.5rem;
+    background: #e0eaf7;
+    color: #063958;
+    border-top: 1px solid #cceeee;
+  }
+  
+  a {
+    color: #001477;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  

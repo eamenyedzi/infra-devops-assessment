@@ -1,0 +1,30 @@
+replicaCount: 1
+
+web1:
+  image: web1:latest
+  imagePullPolicy: Never
+web2:
+  image: web2:latest
+  imagePullPolicy: Never
+reverseProxy:
+  image: nginx:alpine
+  imagePullPolicy: IfNotPresent
+locust:
+  image: locustio/locust
+  host: http://reverse-proxy
+
+auth:  
+  enabled: true         
+  secretName: web-basic-auth
+
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 50
+
+ports:
+  web: 80
+  locust: 8089
+  nodePortWeb: 30080
+  nodePortLocust: 30089

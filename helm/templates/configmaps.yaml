@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reverse-proxy-config
+data:
+  default.conf: |
+    server {
+        listen 80;
+
+        location ^~ /1 {
+            auth_basic           "Restricted - STELLAR";
+            auth_basic_user_file /etc/nginx/auth/.htpasswd;
+
+            rewrite ^/1/(.*)$ /$1 break;
+
+            proxy_pass http://web1/; 
+        }
+
+        location ^~ /2 {
+            auth_basic           "Restricted - BRIGHTER";
+            auth_basic_user_file /etc/nginx/auth/.htpasswd;
+
+            rewrite ^/2/(.*)$ /$1 break;
+            proxy_pass http://web2/;
+        }
+
+        # health probe
+        location = /healthz { return 200 "ok"; }
+
+        # everything else
+        location / { return 404; }
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: locustfile-config
+data:
+  locustfile.py: |
+    import os, base64
+    from locust import HttpUser, task, between
+
+    USERNAME = os.getenv("AUTH_USER", "admin")
+    PASSWORD = os.getenv("AUTH_PASS", "changeme")
+
+    AUTH_HEADER = {
+        "Authorization": "Basic "
+        + base64.b64encode(f"{USERNAME}:{PASSWORD}".encode()).decode()
+    }
+
+    class WebUser(HttpUser):
+        wait_time = between(1, 2)
+
+        def on_start(self):
+            # Attach the header to every request
+            self.client.headers.update(AUTH_HEADER)
+
+        @task(2)
+        def page1(self):
+            self.client.get("/1")
+
+        @task(1)
+        def page2(self):
+            self.client.get("/2")
+
+

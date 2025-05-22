@@ -1,0 +1,159 @@
+{{- range $svc, $cfg := dict "web1" .Values.web1 "web2" .Values.web2 }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $svc }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ $svc }}
+  template:
+    metadata:
+      labels:
+        app: {{ $svc }}
+    spec:
+      containers:
+        - name: {{ $svc }}
+          image: {{ $cfg.image }}
+          imagePullPolicy: {{ $cfg.imagePullPolicy }}
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 5
+---
+{{- end }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reverse-proxy
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: reverse-proxy
+  template:
+    metadata:
+      labels:
+        app: reverse-proxy
+    spec:
+      volumes:
+        - name: config-volume
+          configMap:
+            name: reverse-proxy-config
+        {{- if .Values.auth.enabled }}
+        - name: auth-volume
+          secret:
+            secretName: {{ .Values.auth.secretName }}
+        {{- end }}
+      containers:
+        - name: reverse-proxy
+          image: {{ .Values.reverseProxy.image }}
+          imagePullPolicy: {{ .Values.reverseProxy.imagePullPolicy }}
+          command: ["nginx", "-g", "daemon off;"]
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/nginx/conf.d
+            {{- if .Values.auth.enabled }}
+            - name: auth-volume
+              mountPath: /etc/nginx/auth
+              readOnly: true
+            {{- end }}
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: locust
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: locust
+  template:
+    metadata:
+      labels:
+        app: locust
+    spec:
+      containers:
+        - name: locust
+          image: {{ .Values.locust.image }}
+          args: ["-f", "/mnt/locust/locustfile.py", "--host={{ .Values.locust.host }}"]
+          ports:
+            - containerPort: {{ .Values.ports.locust }}
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          env:
+            - name: AUTH_USER
+              valueFrom:
+                secretKeyRef:
+                  name: web-basic-auth
+                  key: username   # plain text
+            - name: AUTH_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: web-basic-auth
+                  key: password   # plain text
+          volumeMounts:
+            - name: locust-script
+              mountPath: /mnt/locust
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.ports.locust }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.ports.locust }}
+            initialDelaySeconds: 3
+            periodSeconds: 5
+      volumes:
+        - name: locust-script
+          configMap:
+            name: locustfile-config

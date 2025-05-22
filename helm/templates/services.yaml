@@ -1,0 +1,37 @@
+{{- range $svc, $port := dict "web1" .Values.ports.web "web2" .Values.ports.web }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $svc }}
+spec:
+  selector:
+    app: {{ $svc }}
+  ports:
+    - port: {{ $port }}
+      targetPort: {{ $port }}
+---
+{{- end }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: reverse-proxy
+spec:
+  selector:
+    app: reverse-proxy
+  ports:
+    - port: {{ .Values.ports.web }}
+      targetPort: {{ .Values.ports.web }}
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: locust
+spec:
+  selector:
+    app: locust
+  ports:
+    - port: {{ .Values.ports.locust }}
+      targetPort: {{ .Values.ports.locust }}
+  type: LoadBalancer
