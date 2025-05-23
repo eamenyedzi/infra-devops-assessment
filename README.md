@@ -11,12 +11,9 @@ This repository shows **two parallel ways** to run the solution:
 
 ## Design Rationale – Why this approach?
 
-| Decision | Rationale |
-| -------- | --------- |
-|          |           |
-
-| **Two runnable paths (Compose & Helm)** | Quick local testing plus production‑style deployment; shows flexibility. |
+| Decision                                | Rationale                                                                |
 | --------------------------------------- | ------------------------------------------------------------------------ |
+| **Two runnable paths (Compose & Helm)** | Quick local testing plus production‑style deployment; shows flexibility. |
 | **Nginx reverse‑proxy**                 | Lightweight, battle‑tested, native path rewriting & auth.                |
 | **Separate **`** / **`** containers**   | Mirrors micro‑service boundaries; independent scaling & CI.              |
 | **Non‑root images & least privilege**   | Aligns with container‑security best practices.                           |
