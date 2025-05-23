@@ -9,6 +9,23 @@ This repository shows **two parallel ways** to run the solution:
 
 ---
 
+## Design Rationale – Why this approach?
+
+| Decision | Rationale |
+| -------- | --------- |
+|          |           |
+
+| **Two runnable paths (Compose & Helm)** | Quick local testing plus production‑style deployment; shows flexibility. |
+| --------------------------------------- | ------------------------------------------------------------------------ |
+| **Nginx reverse‑proxy**                 | Lightweight, battle‑tested, native path rewriting & auth.                |
+| **Separate **`** / **`** containers**   | Mirrors micro‑service boundaries; independent scaling & CI.              |
+| **Non‑root images & least privilege**   | Aligns with container‑security best practices.                           |
+| **Credentials via Secret**              | Keeps passwords out of Git; demo of k8s secret management.               |
+| **Locust inside the cluster**           | Self‑contained load testing, drives autoscaling demo.                    |
+| **HPA + resource limits**               | Shows operational readiness and auto‑scaling behaviour.                  |
+
+___
+
 ## 1 ‒ Running with Docker Compose
 
 ### Prerequisites
@@ -20,7 +37,7 @@ This repository shows **two parallel ways** to run the solution:
 ```bash
 # 0 – clone repo & move in
  git clone https://github.com/eamenyedzi/infra-devops-assessment.git
- cd infra‑devops‑assessment
+ cd infra-devops-assessment
 
 # 1 – build images (web1, web2)
  docker compose build
@@ -31,6 +48,7 @@ This repository shows **two parallel ways** to run the solution:
 # 3 – visit
  http://localhost/1   # STELLAR page
  http://localhost/2   # BRIGHTER page
+ http://localhost:8089  # load testing url
 
 # 4 – live stats (optional)
  docker stats
@@ -109,10 +127,10 @@ Start a test with 100 users, 10 spawn rate → watch stats.
 
 ### 2.7  Autoscaling demo (optional)
 
+In the Locust UI set 300 users / 30 spawn rate
 ```bash
 # Pump CPU load until HPA scales web1/web2
-kubectl exec -it deploy/web1 -- sh -c "while true; do :; done" &
-watch kubectl get hpa
+kubectl get hpa --watch
 ```
 
 ### 2.8  Cleanup

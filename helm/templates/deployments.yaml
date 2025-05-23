@@ -122,11 +122,11 @@ spec:
             - containerPort: {{ .Values.ports.locust }}
           resources:
             requests:
-              cpu: "100m"
-              memory: "64Mi"
+              cpu: "500m"
+              memory: "1Gi"
             limits:
-              cpu: "200m"
-              memory: "128Mi"
+              cpu: "1000m"
+              memory: "2Gi"
           env:
             - name: AUTH_USER
               valueFrom:
